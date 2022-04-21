@@ -1,0 +1,6 @@
+*.exe
+*.c++
+*.txt
+.cph/
+.vscode/
+stdc++.h
