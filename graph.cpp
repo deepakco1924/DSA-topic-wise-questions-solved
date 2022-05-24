@@ -471,7 +471,7 @@ public:
     //finding the shortset path in the wighted graph
     //it may be unidreceted and directed also
     void Dijkastra(T src)
-    {250
+    {
         unordered_map<T, int> distance;
         for (auto x : l)
         {

@@ -92,7 +92,6 @@ ll phin(ll n) {ll number = n; if (n % 2 == 0) {number /= 2; while (n % 2 == 0) n
 
 
 
-
 struct node
 {
     ll sum;
@@ -225,61 +224,13 @@ public:
     }
 };
 
-
-const int N=2e5+4;
-vector<int>adj[N];
-int n;
-int subans[N];
-int cnt[N];
-int ans[N];
-int  dfs(int node,int parent){
-  cnt[node]=1LL;
-  for(auto x:adj[node]){
-    if(x==parent)continue;
-    cnt[node]+=dfs(x,node);
-    subans[node]+=(subans[x]+cnt[x]);
-  }
-  
-  return cnt[node];
-
-
-}
-void dfs2(int node,int parent,vector<int>&ans)
-{
-
-  if(node!=1){
-  ans[node]=ans[parent]-cnt[node]+(n-cnt[node]);
-  }
-  for(auto x:adj[node]){
-    if(x!=parent){
-      dfs2(x,node,ans);
-    }
-  }
- 
-  
-
-  return ;
-
-}
-
-
 void solve(){
+  int n;
   cin>>n;
-for(int i=0;i<n-1;i++){
-  int x,y;
-  cin>>x>>y;
-  adj[x].push_back(y);
-  adj[y].push_back(x);
+  cout<<n<<" "<<"dee"<<endl;
 }
-dfs(1,-1);
-vector<int>ans(n+1,0);
-ans[1]=subans[1];
-dfs2(1,-1,ans);
-for(int i=1;i<=n;i++){
-  cout<<ans[i]<<" ";
-}
-}
- 
+  
+
 int32_t main() {
  
 #ifndef ONLINE_JUDGE

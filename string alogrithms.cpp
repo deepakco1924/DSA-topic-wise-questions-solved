@@ -1,13 +1,13 @@
 #include<bits/stdc++.h>
 #include<ext/pb_ds/assoc_container.hpp>
 #include<ext/pb_ds/tree_policy.hpp>
- 
+
 using namespace std;
 using namespace chrono;
 using namespace __gnu_pbds;
- 
- 
- 
+
+
+
 #define fastio() ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL)
 #define triple pair<pair<int,int>,int>
 #define MOD 1000000007
@@ -39,13 +39,13 @@ using namespace __gnu_pbds;
   int x;     \
   cin >> x;  \
   while (x--)
- 
+
 #ifndef ONLINE_JUDGE
 #define debug(x) cerr << #x <<" "; _print(x); cerr << endl;
 #else
 #define debug(x)
 #endif
- 
+
 typedef long long ll;
 typedef unsigned long long ull;
 typedef long double lld;
@@ -58,7 +58,7 @@ void _print(char t) {cerr << t;}
 void _print(lld t) {cerr << t;}
 void _print(double t) {cerr << t;}
 void _print(ull t) {cerr << t;}
- 
+
 template <class T, class V> void _print(pair <T, V> p);
 template <class T> void _print(vector <T> v);
 template <class T> void _print(set <T> v);
@@ -71,7 +71,7 @@ template <class T> void _print(multiset <T> v) {cerr << "[ "; for (T i : v) {_pr
 template <class T, class V> void _print(map <T, V> v) {cerr << "[ "; for (auto i : v) {_print(i); cerr << " ";} cerr << "]";}
 template <class T>
 void _print(pbds<T> v) {cerr << "[ "; for (auto i : v) {_print(i); cerr << " ";} cerr << "]";}
- 
+
 /*---------------------------------------------------------------------------------------------------------------------------*/
 ll gcd(ll a, ll b) {if (b > a) {return gcd(b, a);} if (b == 0) {return a;} return gcd(b, a % b);}
 ll expo(ll a, ll b, ll mod) {ll res = 1; while (b > 0) {if (b & 1)res = (res * a) % mod; a = (a * a) % mod; b = b >> 1;} return res;}
@@ -91,206 +91,239 @@ ll phin(ll n) {ll number = n; if (n % 2 == 0) {number /= 2; while (n % 2 == 0) n
 /*--------------------------------------------------------------------------------------------------------------------------*/
 
 
-
-
-struct node
-{
-    ll sum;
-    ll setAll;
-    ll increment;
-    bool setAllValid;
-    node()
-    {
-       sum = 0;
-       setAllValid = 0;
-       increment = 0;
-    }
-    void Reset()
-    {
-       setAllValid = increment = 0;
-    }
-};
+vector<int>longest_prefix(string s){
+     int n=sz(s);
+  vector<int>ans(n,0);
  
-class segtree
-{
-    int range;
-    vector<node> tree;
-public:
-    void build(vector<int>& v)
-    {
-        range = v.size();
-        tree.assign(4*range, node());
-        build_recur(v, 0, range-1, 0);
-    }
-    void build_recur(vector<int>& v, int l, int r, int node_no)
-    {
-        if(l == r){
-            if(l < v.size())
-                tree[node_no].sum = v[l];
-            else tree[node_no].sum = 0;
-            return;
-        }
-        int mid = (l+r)/2;
-        build_recur(v, l, mid, 2*node_no + 1);
-        build_recur(v, mid + 1, r, 2*node_no + 2);
-        tree[node_no].sum = tree[2*node_no + 1].sum + tree[2*node_no + 2].sum;
-    }
-    ll range_query(int L, int R)
-    {
-        return range_query_recur(0, 0, range - 1, L, R);
-    }
- 
-    void incUpdate_recur(int node, int l, int r, int& L, int& R, int& X)
-    {
-        if(r < L || R < l || l >= range)
-            return;
-        if(L <= l && R >= r)
-        {
-            tree[node].increment += X;
-            return;
-        }
-        applyAggr(node,l,r);
-        int mid = (l+r)/2;
-        incUpdate_recur(2*node+1,l,mid,L,R,X);
-        incUpdate_recur(2*node+2,mid+1,r,L,R,X);
-        applyAggr(2*node+1, l, mid);
-        applyAggr(2*node+2, mid+1, r);
-        tree[node].sum = tree[2*node+1].sum + tree[2*node+2].sum;
-    }
- 
-    void incUpdate(int L, int R, int X)
-    {
-        incUpdate_recur(0,0,range-1,L,R,X);
-    }
- 
-    void setUpdate_recur(int node, int l, int r, int& L, int& R, int& X)
-    {
-        if(r < L || R < l || l >= range)
-            return;
-        if(L <= l && R >= r)
-        {
-            tree[node].setAllValid = 1;
-            tree[node].setAll = X;
-            tree[node].increment = 0;
-            return;
-        }
-        applyAggr(node,l,r);
-        int mid = (l+r)/2;
-        setUpdate_recur(2*node+1,l,mid,L,R,X);
-        setUpdate_recur(2*node+2,mid+1,r,L,R,X);
-        applyAggr(2*node+1, l, mid);
-        applyAggr(2*node+2, mid+1, r);
-        tree[node].sum = tree[2*node+1].sum + tree[2*node+2].sum;
-    }
- 
-    void setUpdate(int L, int R, int X)
-    {
-        setUpdate_recur(0,0,range-1,L,R,X);
-    }
- 
-    void compose(int par, int child)
-    {
-        if(tree[par].setAllValid){
-            tree[child].setAllValid = 1;
-            tree[child].setAll = tree[par].setAll;
-            tree[child].increment = tree[par].increment;
-        }
-        else tree[child].increment += tree[par].increment;
-    }
- 
-    void applyAggr(int node, int l, int r)
-    {
-        if(tree[node].setAllValid)
-            tree[node].sum = (r-l+1)*tree[node].setAll;
- 
-        tree[node].sum += (r-l+1)*tree[node].increment;
- 
-        if(l != r){
-            compose(node, 2*node + 1);
-            compose(node, 2*node + 2);
-        }
- 
-        tree[node].Reset();
-    }
- 
-    ll range_query_recur(int node, int l, int r, int& L, int& R)
-    {
-        if(r < L || R < l || l >= range)
-            return 0;
-        applyAggr(node, l, r);
-        if(L <= l && R >= r)
-            return tree[node].sum;
-        int mid = (l+r)/2;
-        return range_query_recur(2*node + 1, l, mid, L, R) + range_query_recur(2*node + 2, mid+1, r, L, R);
-    }
-};
-
-
-const int N=2e5+4;
-vector<int>adj[N];
-int n;
-int subans[N];
-int cnt[N];
-int ans[N];
-int  dfs(int node,int parent){
-  cnt[node]=1LL;
-  for(auto x:adj[node]){
-    if(x==parent)continue;
-    cnt[node]+=dfs(x,node);
-    subans[node]+=(subans[x]+cnt[x]);
+  for(int i=1;i<n;i++){
+    int j=ans[i-1];
+     while(j>0 and s[i]!=s[j]){
+      j=ans[j-1];
+     }
+     if(s[i]==s[j]){
+      j++;
+     }
+     ans[i]=j;
   }
-  
-  return cnt[node];
-
-
-}
-void dfs2(int node,int parent,vector<int>&ans)
-{
-
-  if(node!=1){
-  ans[node]=ans[parent]-cnt[node]+(n-cnt[node]);
-  }
-  for(auto x:adj[node]){
-    if(x!=parent){
-      dfs2(x,node,ans);
-    }
-  }
- 
-  
-
-  return ;
-
+  return ans;
 }
 
 
+void KMP(){
+  string txt;
+  string pattern;
+  cin>>txt;
+  cin>>pattern;
+  vector<int>lps=longest_prefix(pattern);
+  int i=0;
+  int j=0;
+  int n=txt.length();
+  int m=pattern.length();
+  vi ans;
+  while(i<n){
+    if(txt[i]==pattern[j]){
+      i++;
+      j++;
+    }
+
+    else{
+      if(j!=0){
+        j=lps[j-1];
+      }
+      else{
+        i++;
+      }
+    }
+    if(j==m){
+      ans.pb(i-j);
+    }
+  }
+  debug(ans)
+
+}
+int computeHash(string s){
+
+  const int m=1e9+9;
+  int hash=0;
+  int x=1;
+  const int p=31;//use p as 31 if small letters but capital is there use 53
+  for(int i=0;i<sz(s);i++){
+    hash+=((s[i]-'a'+1)*x)%m;
+    x=(x*p)%m;
+    hash=hash%m;
+  }
+  return hash;
+  //probability having two string have same hash is 1/m 
+}
+vector<int>hashArray(string s){
+
+    const int m=1e9+9;
+  int hash=0;
+  int x=1;
+  vector<int>ans;
+  const int p=31;//use p as 31 if small letters but capital is there use 53
+  for(int i=0;i<sz(s);i++){
+    hash+=((s[i]-'a'+1)*x)%m;
+    x=(x*p)%m;
+    hash=hash%m;
+    ans.push_back(hash);
+  }
+  return ans;
+}
+vector<int>findprefix(string s){
+  int n=s.length();
+  vector<int>ans(n,0);
+  for(int i=1;i<n;i++){
+    int j=ans[i-1];
+    while(j>0 and s[i]!=s[j]){
+      j=ans[j-1];
+    }
+     if(s[i]==s[j])
+  {
+    j++;
+  }
+  ans[i]=j;
+  }
+  return  ans;
+}
+
+vector<int>Rabin_karp(string s,string t){
+  vector<int>ans;
+  const int m=1e9+9;
+  const int p=31;
+  int st=sz(s);
+  int tt=sz(t);
+  vector<int>p_pow(tt);
+  p_pow[0]=1;
+  for(int i=1;i<tt;i++){
+    p_pow[i]=(p_pow[i-1]*p)%m;
+  }
+    int hasval=0;
+  for(int i=0;i<st;i++){
+    hasval=(hasval+(s[i]-'a'+1)*p_pow[i])%m;
+    hasval%=m;
+  }
+  vector<int>hast(tt+1,0);
+  for(int i=0;i<tt;i++){
+    hast[i+1]=(hast[i]+(t[i]-'a'+1)*p_pow[i])%m;
+  }
+  for(int i=0;i+st-1<tt;i++){
+    int j=i+st;
+    int val=(hast[j]+m-hast[i])%m;
+    int leftans=(hasval*p_pow[i])%m;
+    if(val==leftans)
+    {
+      ans.pb(i);
+    }
+  }
+
+
+}
+
+vector<int> z_function(string s) {
+    int n = (int) s.length();
+    vector<int> z(n);
+    for (int i = 1, l = 0, r = 0; i < n; ++i) {
+        if (i <= r)
+            z[i] = min (r - i + 1, z[i - l]);
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]])
+            ++z[i];
+        if (i + z[i] - 1 > r)
+            l = i, r = i + z[i] - 1;
+    }
+    return z;
+}
+
+//suffix array
+vector<int> sort_cyclic_shifts(string const& s) {
+    int n = s.size();
+    const int alphabet = 256;
+
+     vector<int> p(n), c(n), cnt(max(alphabet, n), 0);
+    for (int i = 0; i < n; i++)
+        cnt[s[i]]++;
+    for (int i = 1; i < alphabet; i++)
+        cnt[i] += cnt[i-1];
+    for (int i = 0; i < n; i++)
+        p[--cnt[s[i]]] = i;
+    c[p[0]] = 0;
+    int classes = 1;
+    for (int i = 1; i < n; i++) {
+        if (s[p[i]] != s[p[i-1]])
+            classes++;
+        c[p[i]] = classes - 1;
+    }
+    vector<int> pn(n), cn(n);
+    for (int h = 0; (1 << h) < n; ++h) {
+        for (int i = 0; i < n; i++) {
+            pn[i] = p[i] - (1 << h);
+            if (pn[i] < 0)
+                pn[i] += n;
+        }
+        fill(cnt.begin(), cnt.begin() + classes, 0);
+        for (int i = 0; i < n; i++)
+            cnt[c[pn[i]]]++;
+        for (int i = 1; i < classes; i++)
+            cnt[i] += cnt[i-1];
+        for (int i = n-1; i >= 0; i--)
+            p[--cnt[c[pn[i]]]] = pn[i];
+        cn[p[0]] = 0;
+        classes = 1;
+        for (int i = 1; i < n; i++) {
+            pair<int, int> cur = {c[p[i]], c[(p[i] + (1 << h)) % n]};
+            pair<int, int> prev = {c[p[i-1]], c[(p[i-1] + (1 << h)) % n]};
+            if (cur != prev)
+                ++classes;
+            cn[p[i]] = classes - 1;
+        }
+        c.swap(cn);
+    }
+    return p;
+}
+vector<int> suffix_array_construction(string s) {
+    s += "$";
+    vector<int> sorted_shifts = sort_cyclic_shifts(s);
+    // sorted_shifts.erase(sorted_shifts.begin());
+    return sorted_shifts;
+}
+vector<int> lcp_construction(string s, vector<int> const& p) {
+    s+="$";
+    int n = s.size();
+    vector<int> rank(n, 0);
+    for (int i = 0; i < n; i++)
+        rank[p[i]] = i;
+
+    int k = 0;
+    vector<int> lcp(n-1, 0);
+    for (int i = 0; i < n; i++) {
+        if (rank[i] == n - 1) {
+            k = 0;
+            continue;
+        }
+        int j = p[rank[i] + 1];
+        while (i + k < n && j + k < n && s[i+k] == s[j+k])
+            k++;
+        lcp[rank[i]] = k;
+        if (k)
+            k--;
+    }
+    return lcp;
+}
 void solve(){
-  cin>>n;
-for(int i=0;i<n-1;i++){
-  int x,y;
-  cin>>x>>y;
-  adj[x].push_back(y);
-  adj[y].push_back(x);
+
+  
 }
-dfs(1,-1);
-vector<int>ans(n+1,0);
-ans[1]=subans[1];
-dfs2(1,-1,ans);
-for(int i=1;i<=n;i++){
-  cout<<ans[i]<<" ";
-}
-}
- 
+
 int32_t main() {
- 
+
 #ifndef ONLINE_JUDGE
   freopen("error.txt", "w", stderr);
 #endif
- 
+
   fastio();
   auto start1 = high_resolution_clock::now();
   int t = 1;
   // cin >> t;
- 
   while (t--)solve();
   auto stop1 = high_resolution_clock::now();
   auto duration = duration_cast<microseconds>(stop1 - start1);
